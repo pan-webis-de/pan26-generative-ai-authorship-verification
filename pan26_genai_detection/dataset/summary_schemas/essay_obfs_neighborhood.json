@@ -1,0 +1,10 @@
+{
+    "type": "object",
+    "properties": {
+        "key_points": {"type": "array", "items": {"type": "string"}},
+        "tense": {"type": "string", "enum": ["past-tense", "present-tense"]},
+        "pov": {"type": "string", "enum": ["first-person", "second-person", "third-person"]},
+        "style_instructions": {"type": "array", "items": {"type": "string"}}
+    },
+    "required": ["key_points", "tense", "pov", "style_instructions"]
+}
