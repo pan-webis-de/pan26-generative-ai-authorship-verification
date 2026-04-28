@@ -1,4 +1,4 @@
-FROM nvcr.io/nvidia/cuda:12.8.0-cudnn-devel-ubuntu24.04
+FROM nvcr.io/nvidia/cuda:13.2.1-cudnn-devel-ubuntu24.04
 
 RUN set -x \
     && apt update \
@@ -7,8 +7,8 @@ RUN set -x \
 
 # Install dependencies before copying actual source files to make image updates faster.
 # Install flash-attn separately, as it cannot be installed with build isolation and thus Poetry right now.
-COPY pyproject.toml poetry.lock /opt/pan25-generative-ai-detection/
-WORKDIR /opt/pan25-generative-ai-detection
+COPY pyproject.toml poetry.lock /opt/pan26-generative-ai-detection/
+WORKDIR /opt/pan26-generative-ai-detection
 
 RUN --mount=type=cache,target=/root/.cache set -x \
     && python3 -m pip config set global.break-system-packages true \
@@ -17,7 +17,7 @@ RUN --mount=type=cache,target=/root/.cache set -x \
     && python3 -m poetry install --no-root \
     && MAX_JOBS=$(nproc) python3 -m pip install --no-cache --no-build-isolation flash-attn
 
-COPY . /opt/pan25-generative-ai-detection/
+COPY . /opt/pan26-generative-ai-detection/
 
 RUN --mount=type=cache,target=/root/.cache set -x && \
     python3 -m poetry install
