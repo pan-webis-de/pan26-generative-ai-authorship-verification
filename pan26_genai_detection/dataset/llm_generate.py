@@ -14,6 +14,7 @@
 
 import re
 from functools import partial
+from glob import glob
 import json
 import logging
 from multiprocessing import pool, set_start_method
@@ -40,19 +41,8 @@ from vertexai.preview.generative_models import FinishReason, GenerativeModel, Ha
 logger = logging.getLogger(__name__)
 set_start_method('spawn')
 
-_PROMPT_TEMPLATES = [
-    'essay',
-    'essay_obfs_7yo',
-    'essay_obfs_7yo_no_kp',
-    'essay_obfs_rand_words',
-    'essay_obfs_word_order',
-    'essay_obfs_alliteration',
-    'essay_obfs_neighborhood',
-    'fiction_cont',
-    'news_article',
-    'news_article_short',
-    'kaggle_paraphrase'
-]
+_PROMPT_TEMPLATES = [str(p.stem).replace('gen_', '')
+                     for p in Path(__file__).parent.joinpath('prompt_templates').glob('gen_*.jinja2')]
 
 
 def _generate_instruction_prompt(article_data, template_name):
@@ -60,8 +50,11 @@ def _generate_instruction_prompt(article_data, template_name):
     Generate an instruction prompt for generating an article from the given source article data.
     """
 
-    target_paragraphs = article_data['text'].count('\n\n')
-    target_words = round(int(len(re.split(r'\s+', article_data['text'])) * .96) + 9, -1)
+    target_paragraphs = 0
+    target_words = 0
+    if 'text' in article_data:
+        target_paragraphs = article_data['text'].count('\n\n')
+        target_words = round(int(len(re.split(r'\s+', article_data['text'])) * .96) + 9, -1)
 
     env = jinja2.Environment(
         loader=jinja2.PackageLoader('pan26_genai_detection.dataset', 'prompt_templates')
@@ -426,6 +419,30 @@ def huggingface_chat(model_name, prompt_template, input_jsonl, output_dir, outdi
                  prompt_template=prompt_template, out_dir=output_dir, out_dir_suffix=outdir_suffix, **kwargs)
 
     _generate_articles(input_jsonl, fn)
+
+
+@main.command()
+@click.argument('input_dir')
+@click.argument('output_dir')
+@click.option('-s', '--src-lang', default='auto')
+@click.option('-d', '--dest-lang', default='en')
+@click.option('-t', '--translator', default='google')
+def translate(input_dir, output_dir, src_lang, dest_lang, translator):
+    """"
+    Translate (AI-generated) texts.
+    """
+    import translators
+
+    input_dir = Path(input_dir)
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    for infile in tqdm(input_dir.glob('*.txt'), desc='Translating texts'):
+        with open(infile) as inf, open(output_dir / infile.name, 'w') as outf:
+            t = translators.translate_text(
+                inf.read(),
+                from_language=src_lang, to_language=dest_lang, if_use_async=False, translator=translator)
+            outf.write(t)
 
 
 if __name__ == "__main__":
