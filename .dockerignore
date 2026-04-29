@@ -2,7 +2,7 @@
 *
 
 # Whitelist Python modules
-!pan25_genai_detection/**
+!pan26_genai_detection/**
 !poetry.lock
 !pyproject.toml
 !README.md
