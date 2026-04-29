@@ -38,6 +38,7 @@ tira = "^0.0.198"
 nltk = "^3.9.4"
 sentencepiece = "^0.2.1"
 notebook = "^7.5.5"
+translators = "^6.0.4"
 
 [tool.poetry.scripts]
 summarize = 'pan26_genai_detection.dataset.summarize:main'
