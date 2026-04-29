@@ -70,7 +70,7 @@ def binoculars(input_file, output_directory, outfile_name, quantize, flash_attn,
         “Spotting LLMs with Binoculars: Zero-Shot Detection of Machine-Generated
         Text.” arXiv [Cs.CL]. arXiv. http://arxiv.org/abs/2401.12070.
     """
-    from pan25_genai_detection.baselines.binoculars import Binoculars
+    from pan26_genai_detection.baselines.binoculars import Binoculars
 
     detector = Binoculars(
         observer_name_or_path=observer,
@@ -99,7 +99,7 @@ def ppmd(input_file, output_directory, outfile_name):
         Part F1305. Association for Computing Machinery. https://doi.org/10.1145/3098954.3104050.
     """
 
-    from pan25_genai_detection.baselines.ppmd import PPMdDetector
+    from pan26_genai_detection.baselines.ppmd import PPMdDetector
     detector = PPMdDetector()
     detect(detector, input_file, output_directory, outfile_name)
 
@@ -113,7 +113,7 @@ def tfidf(input_file, output_directory, outfile_name):
     PAN'25 baseline: TF-IDF SVM.
     """
 
-    from pan25_genai_detection.baselines.tfidf import TfidfDetector
+    from pan26_genai_detection.baselines.tfidf import TfidfDetector
     detector = TfidfDetector()
     detect(detector, input_file, output_directory, outfile_name, c_at_1_threshold=0.05)
 

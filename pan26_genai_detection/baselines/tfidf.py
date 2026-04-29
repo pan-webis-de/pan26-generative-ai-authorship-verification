@@ -21,7 +21,7 @@ import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.svm import LinearSVC
 
-from pan25_genai_detection.baselines.detector_base import DetectorBase
+from pan26_genai_detection.baselines.detector_base import DetectorBase
 
 __all__ = ['TfidfDetector']
 

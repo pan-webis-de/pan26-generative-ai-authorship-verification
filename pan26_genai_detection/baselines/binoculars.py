@@ -17,8 +17,8 @@ import typing as t
 import torch
 import transformers
 
-from pan25_genai_detection.baselines.detector_base import DetectorBase
-from pan25_genai_detection.baselines.util import *
+from pan26_genai_detection.baselines.detector_base import DetectorBase
+from pan26_genai_detection.baselines.util import *
 
 __all__ = ['Binoculars']
 

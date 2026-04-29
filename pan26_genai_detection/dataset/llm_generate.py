@@ -64,7 +64,7 @@ def _generate_instruction_prompt(article_data, template_name):
     target_words = round(int(len(re.split(r'\s+', article_data['text'])) * .96) + 9, -1)
 
     env = jinja2.Environment(
-        loader=jinja2.PackageLoader('pan25_genai_detection.dataset', 'prompt_templates')
+        loader=jinja2.PackageLoader('pan26_genai_detection.dataset', 'prompt_templates')
     )
     try:
         template = env.get_template(f'gen_{template_name}.jinja2')

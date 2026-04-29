@@ -17,7 +17,7 @@ import typing as t
 import numpy as np
 import pyppmd
 
-from pan25_genai_detection.baselines.detector_base import DetectorBase
+from pan26_genai_detection.baselines.detector_base import DetectorBase
 
 __all__ = ['PPMdDetector']
 

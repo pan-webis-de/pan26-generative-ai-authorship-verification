@@ -88,7 +88,7 @@ def summarize(prompt_template, input_dir, output_dir, api_key, assistant_name, m
     client = OpenAI(api_key=open(api_key).read().strip() if api_key else os.environ.get('OPENAI_API_KEY'))
 
     env = jinja2.Environment(
-        loader=jinja2.PackageLoader('pan25_genai_detection.dataset', 'prompt_templates')
+        loader=jinja2.PackageLoader('pan26_genai_detection.dataset', 'prompt_templates')
     )
     template = env.get_template(f'sum_{prompt_template}.jinja2')
     input_dir = Path(input_dir).resolve()

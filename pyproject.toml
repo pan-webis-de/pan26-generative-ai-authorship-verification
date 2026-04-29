@@ -45,8 +45,8 @@ news-source = 'pan26_genai_detection.dataset.news_source:main'
 llm-generate = 'pan26_genai_detection.dataset.llm_generate:main'
 dataset-sample = 'pan26_genai_detection.dataset.dataset_sample:main'
 dataset-paraphrase = 'pan26_genai_detection.dataset.paraphrase:main'
-pan25-baseline = 'pan26_genai_detection.baselines.cli:main'
-pan25-evaluator = 'pan26_genai_detection.evaluator.evaluator:main'
+pan26-baseline = 'pan26_genai_detection.baselines.cli:main'
+pan26-evaluator = 'pan26_genai_detection.evaluator.evaluator:main'
 
 [build-system]
 requires = ["poetry-core"]
