@@ -33,12 +33,17 @@ class TfidfDetector(DetectorBase):
 
     _BASEDIR = Path(__file__).parent
 
+    def __init__(self):
+        super().__init__()
+        model_file = self._BASEDIR / 'tfidf_model.pkl'
+        if model_file.exists():
+            self.clf, self.vec = pickle.load(model_file.open('rb'))
+
     def _normalize_scores(self, scores):
         return scores
 
     def _get_score_impl(self, text: t.Iterable[str]) -> np.ndarray:
-        clf, vec = pickle.load((self._BASEDIR / 'tfidf_model.pkl').open('rb'))
-        return clf._predict_proba_lr(vec.transform(text))[:, 1]
+        return self.clf._predict_proba_lr(self.vec.transform(text))[:, 1]
 
     @classmethod
     def train(cls, jsonl_path):
