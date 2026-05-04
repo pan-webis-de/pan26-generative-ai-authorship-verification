@@ -1,4 +1,4 @@
-FROM nvcr.io/nvidia/cuda:13.0.3-cudnn-devel-ubuntu24.04
+FROM nvcr.io/nvidia/cuda:12.8.1-cudnn-devel-ubuntu24.04
 
 RUN set -x \
     && apt update \
@@ -15,8 +15,7 @@ RUN --mount=type=cache,target=/root/.cache set -x \
     && python3 -m pip install poetry packaging setuptools \
     && python3 -m poetry config virtualenvs.create false \
     && python3 -m poetry install --no-root \
-    && python3 -m pip install --no-cache \
-        https://github.com/Dao-AILab/flash-attention/releases/download/v2.8.3/flash_attn-2.8.3+cu12torch2.8cxx11abiTRUE-cp312-cp312-linux_x86_64.whl
+    && MAX_JOBS=4 python3 -m pip install flash-attn --no-build-isolation
 
 COPY . /opt/pan26-generative-ai-detection/
 
