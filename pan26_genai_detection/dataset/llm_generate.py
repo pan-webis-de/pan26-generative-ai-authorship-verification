@@ -396,7 +396,7 @@ def huggingface_chat(model_name, prompt_template, input_jsonl, output_dir, outdi
                      watermark_ratio, **kwargs):
     set_seed(seed)
     model_name_out = model_name
-    model_args: t.Dict[str, t.Any] = {'torch_dtype': torch.bfloat16}
+    model_args: t.Dict[str, t.Any] = {'dtype': torch.bfloat16}
     if flash_attn:
         model_args.update({'attn_implementation': 'flash_attention_2'})
     if quantization:
