@@ -33,7 +33,8 @@ from openai import OpenAI, OpenAIError
 from resiliparse.extract import html2text
 from tqdm import tqdm
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig, set_seed
+from transformers import (AutoModelForCausalLM, AutoTokenizer, LogitsProcessor, LogitsProcessorList,
+                          BitsAndBytesConfig, set_seed, WatermarkingConfig)
 from vertexai.language_models import ChatModel, TextGenerationModel
 from vertexai.preview.generative_models import FinishReason, GenerativeModel, HarmCategory, HarmBlockThreshold
 
@@ -154,6 +155,27 @@ def _clean_text_quirks(text):
     # Normalize white space
     text = re.sub(r'\n{3,}', '\n\n', text)
     return text.strip()
+
+
+class ReverseTopKLogitsWarper(LogitsProcessor):
+    """
+    Reverse implementation of Huggingface's top-k logits warper.
+    Masks the top-k tokens, generating only less-likely tokens.
+    """
+    def __init__(self, top_k: int, filter_value: float = -float("Inf"), min_tokens_to_keep: int = 1):
+        if not isinstance(top_k, int) or top_k <= 0:
+            raise ValueError(f"`top_k` has to be a strictly positive integer, but is {top_k}")
+
+        self.top_k = max(top_k, min_tokens_to_keep)
+        self.filter_value = filter_value
+        self.min_tokens_to_keep = min_tokens_to_keep  # used for CB processor initialization
+
+    def __call__(self, input_ids: torch.LongTensor, scores: torch.FloatTensor) -> torch.FloatTensor:
+        top_k = min(self.top_k, scores.size(-1))  # Safety check
+        # Remove all tokens with a probability larger than the last token of the top-k
+        indices_to_remove = scores > torch.topk(scores, top_k)[0][..., -1, None]
+        scores_processed = scores.masked_fill(indices_to_remove, self.filter_value)
+        return scores_processed
 
 
 @backoff.on_exception(backoff.expo, OpenAIError, max_tries=3)
@@ -352,6 +374,7 @@ def vertexai(prompt_template, input_jsonl, output_dir, model_name, outdir_name, 
 @click.option('-s', '--decay-start', type=click.IntRange(1), default=1000, help='Length decay penalty start')
 @click.option('--decay-factor', type=click.FloatRange(1), default=1.01, help='Length decay penalty factor')
 @click.option('-k', '--top-k', type=click.IntRange(0), default=0, help='Top-k sampling (0 to disable)')
+@click.option('--reverse-top-k', type=click.IntRange(0), default=0, help='Reverse top-k sampling (0 to disable)')
 @click.option('-p', '--top-p', type=click.FloatRange(0, 1), default=0.9, help='Top-p sampling')
 @click.option('-a', '--penalty-alpha', type=click.FloatRange(0, 1), default=0.0,
               help='Contrastive search penalty')
@@ -365,9 +388,12 @@ def vertexai(prompt_template, input_jsonl, output_dir, model_name, outdir_name, 
 @click.option('-q', '--quantization', type=click.Choice(['4', '8']))
 @click.option('--trust-remote-code', is_flag=True, help='Trust remote code')
 @click.option('--seed', type=int, default=42, help='Random seed')
+@click.option('-w', '--watermark-ratio', type=float, default=1,
+              help='Green-list token ratio for watermarking (1 to disable)')
 def huggingface_chat(model_name, prompt_template, input_jsonl, output_dir, outdir_name, outdir_suffix, device,
-                     quantization, min_length, max_new_tokens, top_k, top_p, penalty_alpha, decay_start, decay_factor,
-                     strip_thinking, cot_factor, better_transformer, flash_attn, trust_remote_code, seed, **kwargs):
+                     quantization, min_length, max_new_tokens, top_k, reverse_top_k, top_p, penalty_alpha, decay_start,
+                     decay_factor, strip_thinking, cot_factor, better_transformer, flash_attn, trust_remote_code, seed,
+                     watermark_ratio, **kwargs):
     set_seed(seed)
     model_name_out = model_name
     model_args: t.Dict[str, t.Any] = {'torch_dtype': torch.bfloat16}
@@ -415,6 +441,16 @@ def huggingface_chat(model_name, prompt_template, input_jsonl, output_dir, outdi
         strip_thinking=strip_thinking
     ))
 
+    if watermark_ratio < 1:
+        kwargs['watermarking_config'] = WatermarkingConfig(
+            hashing_key=42,
+            greenlist_ratio=watermark_ratio,
+            seeding_scheme='selfhash'
+        )
+
+    if reverse_top_k > 0:
+        kwargs['logits_processor'] = LogitsProcessorList([ReverseTopKLogitsWarper(reverse_top_k)])
+
     fn = partial(_map_records_to_files, fn=_huggingface_chat_gen_article,
                  prompt_template=prompt_template, out_dir=output_dir, out_dir_suffix=outdir_suffix, **kwargs)
 
@@ -424,24 +460,37 @@ def huggingface_chat(model_name, prompt_template, input_jsonl, output_dir, outdi
 @main.command()
 @click.argument('input_dir')
 @click.argument('output_dir')
-@click.option('-s', '--src-lang', default='auto')
-@click.option('-d', '--dest-lang', default='en')
-@click.option('-t', '--translator', default='google')
-def translate(input_dir, output_dir, src_lang, dest_lang, translator):
+@click.option('-s', '--src-lang', default='auto', help='Input language', show_default=True)
+@click.option('-d', '--dest-lang', default='en', help='Target language', show_default=True)
+@click.option('-t', '--translator', default='google', help='Translation engine', show_default=True)
+@click.option('-r', '--round-trips', help='Additional round-trip languages (comma-separated)')
+def translate(input_dir, output_dir, src_lang, dest_lang, translator, round_trips):
     """"
     Translate (AI-generated) texts.
     """
+    from itertools import pairwise
     import translators
 
     input_dir = Path(input_dir)
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
+    round_trips = round_trips.split(',') if round_trips else []
 
     for infile in tqdm(input_dir.glob('*.txt'), desc='Translating texts'):
-        with open(infile) as inf, open(output_dir / infile.name, 'w') as outf:
-            t = translators.translate_text(
-                inf.read(),
-                from_language=src_lang, to_language=dest_lang, if_use_async=False, translator=translator)
+        lang_chain = [src_lang, *round_trips, dest_lang]
+        with open(infile) as inf:
+            t = inf.read()
+        for s, d in pairwise(lang_chain):
+            for _ in range(3):
+                try:
+                    t = translators.translate_text(t,
+                                                   from_language=s,
+                                                   to_language=d,if_use_async=False,
+                                                   translator=translator)
+                    break
+                except:
+                    continue
+        with open(output_dir / infile.name, 'w') as outf:
             outf.write(t)
 
 
