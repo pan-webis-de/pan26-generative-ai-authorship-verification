@@ -444,7 +444,7 @@ def huggingface_chat(model_name, prompt_template, input_jsonl, output_dir, outdi
         kwargs['watermarking_config'] = WatermarkingConfig(
             hashing_key=42,
             greenlist_ratio=watermark_ratio,
-            seeding_scheme='selfhash'
+            seeding_scheme='lefthash'
         )
 
     if reverse_top_k > 0:
