@@ -395,7 +395,7 @@ def huggingface_chat(model_name, prompt_template, input_jsonl, output_dir, outdi
                      decay_factor, strip_thinking, cot_factor, better_transformer, flash_attn, trust_remote_code, seed,
                      watermark_ratio, **kwargs):
     set_seed(seed)
-    model_name_out = model_name
+    model_name_out = Path(model_name.rstrip('/')).name.lower()
     model_args: t.Dict[str, t.Any] = {'dtype': torch.bfloat16}
     if flash_attn:
         model_args.update({'attn_implementation': 'flash_attention_2'})
@@ -408,9 +408,8 @@ def huggingface_chat(model_name, prompt_template, input_jsonl, output_dir, outdi
                 bnb_4bit_quant_type='nf4'
             )
         })
-        model_name_out = model_name + f'-{quantization}bit'
+        model_name_out += f'-{quantization}bit'
 
-    model_name_out = Path(model_name_out).name.lower()
     output_dir = Path(output_dir) / (outdir_name if outdir_name else model_name_out)
 
     try:
