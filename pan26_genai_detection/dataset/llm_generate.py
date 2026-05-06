@@ -390,10 +390,11 @@ def vertexai(prompt_template, input_jsonl, output_dir, model_name, outdir_name, 
 @click.option('--seed', type=int, default=42, help='Random seed')
 @click.option('-w', '--watermark-ratio', type=float, default=1,
               help='Green-list token ratio for watermarking (1 to disable)')
+@click.option('--watermark-bias', type=float, default=2.0, help='Watermarking bias (defaults to 2.0)')
 def huggingface_chat(model_name, prompt_template, input_jsonl, output_dir, outdir_name, outdir_suffix, device,
                      quantization, min_length, max_new_tokens, top_k, reverse_top_k, top_p, penalty_alpha, decay_start,
                      decay_factor, strip_thinking, cot_factor, better_transformer, flash_attn, trust_remote_code, seed,
-                     watermark_ratio, **kwargs):
+                     watermark_ratio, watermark_bias, **kwargs):
     set_seed(seed)
     model_name_out = Path(model_name.rstrip('/')).name.lower()
     model_args: t.Dict[str, t.Any] = {'dtype': torch.bfloat16}
@@ -443,6 +444,7 @@ def huggingface_chat(model_name, prompt_template, input_jsonl, output_dir, outdi
     if watermark_ratio < 1:
         kwargs['watermarking_config'] = WatermarkingConfig(
             hashing_key=42,
+            bias=watermark_bias,
             greenlist_ratio=watermark_ratio,
             seeding_scheme='lefthash'
         )
