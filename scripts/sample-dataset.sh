@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright 2025 Janek Bevendorff, Webis
+# Copyright 2026 Janek Bevendorff, Webis
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,14 +14,17 @@
 # limitations under the License.
 
 dataset-sample sample-balanced \
+    --output-file data/sampled/pan26-voight-kampff.jsonl \
     --max-imbalance 4 \
     --scramble-ids \
     --no-end-fixup \
     -h data/text-human-jsonl/human/brown.jsonl \
     -h data/text-human-jsonl/human/nytimes-writing-prompts.jsonl \
+    -m data/text-llm-jsonl/gpt-5.4/nytimes-writing-prompts.jsonl \
     -m data/text-llm-jsonl/gpt-5.4/nytimes-writing-prompts-tibet-translated-en.jsonl \
     -m data/text-llm-jsonl/gpt-5.4/nytimes-writing-prompts-tibet-translated-mr-kk-ja-lo-iw-am-en.jsonl \
     -m data/text-llm-jsonl/gpt-5.4/nytimes-writing-prompts-tibet-translated-en-zh-fa-en.jsonl \
+    -m data/text-llm-jsonl/gpt-5.5/brown-cont.jsonl \
     -m data/text-llm-jsonl/gpt-5.5/nytimes-writing-prompts-reverse-swahili-translated.jsonl \
     -m data/text-llm-jsonl/llama-3.3-70b-instruct-8bit-rtop1/nytimes-writing-prompts.jsonl \
     -m data/text-llm-jsonl/llama-3.3-70b-instruct-8bit-watermark-gamma05-bias5-temp1/nytimes-writing-prompts.jsonl \

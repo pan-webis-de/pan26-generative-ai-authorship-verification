@@ -235,7 +235,12 @@ def sample_balanced(human, machine, output_file, scramble_ids, prefix_ids, id_sa
                 json.dump({'id': record_data['id'], 'orig_id': orig_id}, id_file)
                 id_file.write('\n')
 
-            json.dump(record_data, out, ensure_ascii=False)
+            # Ensure text is last key
+            text = record_data['text']
+            del record_data['text']
+            record_data['text'] = text
+
+            json.dump(record_data, out, ensure_ascii=False, sort_keys=False)
             out.write('\n')
 
     if id_file:

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright 2025 Janek Bevendorff, Webis
+# Copyright 2026 Janek Bevendorff, Webis
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,4 +13,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-dataset-sample split -t 1 -v 0 data/sampled/sampled.jsonl
+dataset-sample split -t 1 -v 0 data/sampled/pan26-voight-kampff.jsonl
