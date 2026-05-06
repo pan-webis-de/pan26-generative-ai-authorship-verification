@@ -87,27 +87,24 @@ def text2jsonl(text_dir, model_name, output_dir, id_prefix, text_glob):
 
     for td in tqdm(text_dir, desc='Processing input dirs'):
         td = Path(td).resolve()
-        for t in [d for d in td.iterdir() if d.is_dir()]:
-            model_name = model_name_override or t.parent.name
-            dataset_name = t.name
-            opath = output_dir / dataset_name / f'{dataset_name}-{model_name}.jsonl'
-            opath.parent.mkdir(parents=True, exist_ok=True)
-            with open(opath, 'w') as out:
-                for f in tqdm(t.rglob(text_glob), desc='Converting text dir into JSONL', leave=False):
-                    f_id = Path(dataset_name)
-                    if model_name != 'human':
-                        f_id /= model_name
-                    f_id /= f.resolve().relative_to(t).with_suffix('')
-                    if id_prefix:
-                        f_id = Path(id_prefix) / f_id
-
-                    record_data = {
-                        'id': f_id.as_posix(),
-                        'text': f.read_text().strip(),
-                        'model': model_name or f_id.parents[-2].name
-                    }
-                    json.dump(record_data, out, ensure_ascii=False)
-                    out.write('\n')
+        for m_dir in [d for d in td.iterdir() if d.is_dir()]:
+            model_name = model_name_override or m_dir.name
+            for ds_dir in [d for d in m_dir.iterdir() if d.is_dir()]:
+                opath = output_dir / model_name / f'{ds_dir.name}.jsonl'
+                opath.parent.mkdir(parents=True, exist_ok=True)
+                with open(opath, 'w') as out:
+                    for f in tqdm(ds_dir.rglob(text_glob), desc='Converting text dir into JSONL', leave=False):
+                        p = Path(f).relative_to(td)
+                        f_id = '/'.join([*p.parts[:-1], p.stem])
+                        if id_prefix:
+                            f_id = id_prefix + '/' + f_id
+                        record_data = {
+                            'id': f_id,
+                            'text': f.read_text().strip(),
+                            'model': model_name
+                        }
+                        json.dump(record_data, out, ensure_ascii=False)
+                        out.write('\n')
 
 
 _WORD_CHAR_RE = re.compile(r'[\w,]')
