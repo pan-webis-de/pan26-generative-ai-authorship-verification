@@ -7,14 +7,14 @@ System evaluator for the "Voight-Kampff" Generative AI Authorship Verification B
 If installed via ``pip``, you can just run the baselines with
 
 ```
-pan25-evaluator ANSWER_FILE TRUTH_FILE OUTPUT_DIR
+pan26-evaluator ANSWER_FILE TRUTH_FILE OUTPUT_DIR
 ```
 
 Use `--help` on any subcommand for more information:
 
 ```console
-$ pan25-evaluator --help                                                                                                                                                          USAGE   master  2✔  2✎  ⎈ webis  ceph 
-Usage: pan25-evaluator [OPTIONS] ANSWER_FILE TRUTH_FILE OUTPUT_DIR
+$ pan26-evaluator --help                                                                                                                                                          USAGE   master  2✔  2✎  ⎈ webis  ceph 
+Usage: pan26-evaluator [OPTIONS] ANSWER_FILE TRUTH_FILE OUTPUT_DIR
 
   PAN'25 Generative AI Authorship Verification evaluator.
 
@@ -31,7 +31,7 @@ If you want to run the baselines via Docker, use:
 
 ```
 docker run --rm -v RUN_FILE:/run.jsonl -v TRUTH_FILE:/truth.jsonl -v OUTPUT_DIRECTORY:/out \
-    ghcr.io/pan-webis-de/pan25-generative-authorship-evaluator \
+    ghcr.io/pan-webis-de/pan26-generative-authorship-evaluator \
     /run.jsonl /truth.jsonl /out
 ```
 
@@ -42,6 +42,6 @@ Concrete example:
 
 ```
 docker run --rm -v $(pwd)/run.jsonl:/run.jsonl -v $(pwd)/truth.jsonl:/truth.jsonl -v $(pwd):/out \
-    ghcr.io/pan-webis-de/pan25-generative-authorship-evaluator \
+    ghcr.io/pan-webis-de/pan26-generative-authorship-evaluator \
     /run.jsonl /truth.jsonl /out
 ```
