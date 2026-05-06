@@ -1,4 +1,6 @@
+from collections import defaultdict
 import json
+from math import fsum
 from pathlib import Path
 
 import click
@@ -207,7 +209,6 @@ def evaluate_all(y_true, y_pred):
     for k, v in results.items():
         results[k] = round(v, 3) if v is not None else v
 
-    results['confusion'] = confusion(y_true, y_pred)
     return results
 
 
@@ -264,11 +265,9 @@ def optimize_pred_scores(y_true, y_pred, max_steps=1000) -> float:
               help='Output JSON filename')
 @click.option('-p', '--skip-prototext', is_flag=True,
               help='Skip Tira Prototext output, only write JSON')
-@click.option('-s', '--skip-source-eval', is_flag=True, help='Skip evaluation of individual sources')
-@click.option('--optimize-score', is_flag=True, help='Optimize score by finding optimal operating point')
-def main(answer_file, truth_file, output_dir, outfile_name, skip_prototext, skip_source_eval, optimize_score):
+def main(answer_file, truth_file, output_dir, outfile_name, skip_prototext):
     """
-    PAN'25 Generative AI Authorship Verification evaluator.
+    PAN'26 Generative AI Authorship Verification evaluator.
     """
     pred = load_problem_file(answer_file)
     truth = load_problem_file(truth_file)
@@ -281,40 +280,24 @@ def main(answer_file, truth_file, output_dir, outfile_name, skip_prototext, skip
     if len(pred) > len(truth) or set(truth.keys()).union(set(pred)) != set(truth.keys()):
         raise click.UsageError('Truth file does not match answer file.')
 
-    y_true, y_pred = vectorize(truth, pred)
+    results = defaultdict(list)
+    sources = sorted({v['source'] for v in truth.values()})
+    for s in sources:
+        y_true, y_pred = vectorize({k: v for k, v in truth.items() if v['source'] == s}, pred)
 
-    # Find optimal operating point if --optimize-score is set
-    score_offset = 0.0
-    if optimize_score:
-        score_offset = optimize_pred_scores(y_true, y_pred)
-        y_pred += score_offset
-        for k in pred:
-            pred[k] = {k_: v_ + score_offset if k_ == 'label' else v_ for k_, v_ in pred[k].items()}
+        for k, v in evaluate_all(y_true, y_pred).items():
+            results[k].append(v)
 
-    # Evaluate all test cases
-    results = evaluate_all(y_true, y_pred)
+    # Calculate macro average
+    results = {k: fsum(v) / len(v) for k, v in results.items()}
 
     # Write Tira Prototext
     if not skip_prototext:
         with (output_dir / (outfile_name.stem + '.prototext')).open('w') as f:
             f.write(to_prototext([{k: v} for k, v in results.items() if type(v) is float]))
 
-    # Evaluate test cases for individual sources and add to JSON output
-    if not skip_source_eval:
-        for s in ['source', 'model', 'genre']:
-            keys = sorted({v[s] for v in truth.values() if s in v})
-            if not keys:
-                continue
-            results[f'_eval-{s}'] = {k: evaluate_all(*vectorize(
-                {k_: v_ for k_, v_ in truth.items() if v_[s] == k}, pred)) for k in keys}
-
     jstr = json.dumps(results, indent=4, sort_keys=False)
     click.echo(jstr)
-    with (output_dir / outfile_name).open('w') as f:
-        f.write(jstr)
-
-    if optimize_score:
-        click.echo(f'-> Score offset applied: {score_offset}', err=True)
 
 
 if __name__ == '__main__':
