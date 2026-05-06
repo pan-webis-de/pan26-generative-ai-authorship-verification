@@ -221,6 +221,8 @@ def sample_balanced(human, machine, output_file, scramble_ids, prefix_ids, id_sa
             else:
                 continue
 
+            record_data['source'] = _it_current_file.stem
+
             if not no_end_fixup:
                 record_data['text'] = _fixup_midsentence_end(record_data['text'])
 

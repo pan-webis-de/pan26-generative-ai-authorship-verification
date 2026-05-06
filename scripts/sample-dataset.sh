@@ -19,9 +19,9 @@ dataset-sample sample-balanced \
     --no-end-fixup \
     -h data/text-human-jsonl/human/brown.jsonl \
     -h data/text-human-jsonl/human/nytimes-writing-prompts.jsonl \
-    -m data/text-llm-jsonl/gpt-5.4/nytimes-writing-prompts-translated-en.jsonl \
-    -m data/text-llm-jsonl/gpt-5.4/nytimes-writing-prompts-translated-mr-kk-ja-lo-iw-am-en.jsonl \
-    -m data/text-llm-jsonl/gpt-5.4/nytimes-writing-prompts-translated-en-zh-fa-en.jsonl \
+    -m data/text-llm-jsonl/gpt-5.4/nytimes-writing-prompts-tibet-translated-en.jsonl \
+    -m data/text-llm-jsonl/gpt-5.4/nytimes-writing-prompts-tibet-translated-mr-kk-ja-lo-iw-am-en.jsonl \
+    -m data/text-llm-jsonl/gpt-5.4/nytimes-writing-prompts-tibet-translated-en-zh-fa-en.jsonl \
     -m data/text-llm-jsonl/gpt-5.5/nytimes-writing-prompts-reverse-swahili-translated.jsonl \
     -m data/text-llm-jsonl/llama-3.3-70b-instruct-8bit-rtop1/nytimes-writing-prompts.jsonl \
     -m data/text-llm-jsonl/llama-3.3-70b-instruct-8bit-watermark-gamma05-bias5-temp1/nytimes-writing-prompts.jsonl \
