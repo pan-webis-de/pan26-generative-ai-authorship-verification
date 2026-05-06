@@ -290,8 +290,7 @@ def split(input_file, output_dir, val_size, test_size, seed):
             test_out = output_dir / (f.stem + '-test.jsonl')
             truth_out = output_dir / (f.stem + '-test-truth.jsonl')
             _dump_jsonl(lines[val_size:val_size + test_size], test_out, allowed_fields_test)
-            _dump_jsonl(lines[val_size:val_size + test_size], truth_out, allowed_fields_truth,
-                        add_fields={'source': f.stem})
+            _dump_jsonl(lines[val_size:val_size + test_size], truth_out, allowed_fields_truth)
 
         if val_size + test_size < len(lines):
             train_out = output_dir / (f.stem + '-train.jsonl')
