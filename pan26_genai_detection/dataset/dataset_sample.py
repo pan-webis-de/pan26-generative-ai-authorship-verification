@@ -145,13 +145,15 @@ def _fixup_midsentence_end(text):
 @click.option('-i', '--max-imbalance', type=click.FloatRange(0), default=4.0,
               help='Maximum class imbalance of machine/human (zero to disable)')
 @click.option('--max-machine', help='Hard limit for machine texts', type=int)
-@click.option('--min-length', type=click.FloatRange(0, min_open=True), default=800,
+@click.option('--min-length', type=click.IntRange(0, min_open=True), default=800,
               help='Minimum text length in characters')
+@click.option('--max-length', type=click.IntRange(0, min_open=True),
+              help='Maximum text length in characters (truncates after the next paragraph)')
 @click.option('--no-end-fixup', is_flag=True, help='Don\'t fixup generations ending mid-sentence')
 @click.option('--genre', help='Optional genre key to add to all texts')
 @click.option('--seed', type=int, default=42, help='Random seed')
 def sample_balanced(human, machine, output_file, scramble_ids, prefix_ids, id_salt, max_imbalance, max_machine,
-                    min_length, no_end_fixup, genre, seed):
+                    min_length, max_length, no_end_fixup, genre, seed):
     random.seed(seed)
 
     if not machine:
@@ -235,8 +237,19 @@ def sample_balanced(human, machine, output_file, scramble_ids, prefix_ids, id_sa
                 json.dump({'id': record_data['id'], 'orig_id': orig_id}, id_file)
                 id_file.write('\n')
 
-            # Ensure text is last key
+            # Truncate long texts
             text = record_data['text']
+            if max_length and len(text) > max_length:
+                crop_length = max_length
+                try:
+                    idx = text[crop_length:].index('\n')
+                    if idx >= 0:
+                        crop_length += idx
+                except:
+                    pass
+                text = text[:crop_length]
+
+            # Ensure text is last key
             del record_data['text']
             record_data['text'] = text
 

@@ -18,6 +18,7 @@ dataset-sample sample-balanced \
     --max-imbalance 4 \
     --scramble-ids \
     --no-end-fixup \
+    --max-length 4000 \
     -h data/text-human-jsonl/human/brown.jsonl \
     -h data/text-human-jsonl/human/nytimes-writing-prompts.jsonl \
     -m data/text-llm-jsonl/gpt-4o/nytimes-writing-prompts.jsonl \
