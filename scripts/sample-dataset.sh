@@ -20,6 +20,7 @@ dataset-sample sample-balanced \
     --no-end-fixup \
     -h data/text-human-jsonl/human/brown.jsonl \
     -h data/text-human-jsonl/human/nytimes-writing-prompts.jsonl \
+    -m data/text-llm-jsonl/gpt-4o/nytimes-writing-prompts.jsonl \
     -m data/text-llm-jsonl/gpt-5.4/nytimes-writing-prompts.jsonl \
     -m data/text-llm-jsonl/gpt-5.4/nytimes-writing-prompts-tibet-translated-en.jsonl \
     -m data/text-llm-jsonl/gpt-5.4/nytimes-writing-prompts-tibet-translated-mr-kk-ja-lo-iw-am-en.jsonl \
