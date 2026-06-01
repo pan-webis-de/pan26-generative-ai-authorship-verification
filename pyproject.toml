@@ -19,7 +19,6 @@ click = "^8.3.3"
 gnews = "^0.4.3"
 newspaper3k = "^0.2.8"
 betterproto = "^1.2.5"
-pandas = "^3.0.2"
 numpy = "^2.4.4"
 transformers = "^5.6.2"
 torch = {version = "<2.10.0", source = "pytorch-cu128"}
@@ -44,6 +43,7 @@ nltk = "^3.9.4"
 sentencepiece = "^0.2.1"
 notebook = "^7.5.5"
 translators = "^6.0.4"
+polars = "^1.41.2"
 
 [tool.poetry.scripts]
 summarize = 'pan26_genai_detection.dataset.summarize:main'

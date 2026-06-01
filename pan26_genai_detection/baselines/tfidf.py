@@ -17,7 +17,7 @@ import pickle
 import typing as t
 
 import numpy as np
-import pandas as pd
+import polars as pl
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.svm import LinearSVC
 
@@ -47,7 +47,7 @@ class TfidfDetector(DetectorBase):
 
     @classmethod
     def train(cls, jsonl_path):
-        df = pd.read_json(jsonl_path, lines=True)
+        df = pl.read_ndjson(jsonl_path)
 
         print('Fitting vectorizer...')
         vec = TfidfVectorizer(ngram_range=(1, 4), max_features=1000)
