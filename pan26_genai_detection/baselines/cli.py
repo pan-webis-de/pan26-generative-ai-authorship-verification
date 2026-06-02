@@ -22,7 +22,7 @@ from tqdm import tqdm
 @click.group()
 def main():
     """
-    PAN'25 Generative AI Authorship Verification baselines.
+    PAN'26 Generative AI Authorship Verification baselines.
     """
     pass
 
@@ -61,7 +61,7 @@ def detect(detector, input_file, output_directory, outfile_name, c_at_1_threshol
 def binoculars(input_file, output_directory, outfile_name, quantize, flash_attn,
                observer, performer, device):
     """
-    PAN'25 baseline: Binoculars.
+    PAN'26 baseline: Binoculars.
 
     References:
     ===========
@@ -87,7 +87,7 @@ def binoculars(input_file, output_directory, outfile_name, quantize, flash_attn,
 @click.option('-o', '--outfile-name', help='Output file name', default='ppmd.jsonl', show_default=True)
 def ppmd(input_file, output_directory, outfile_name):
     """
-    PAN'25 baseline: Compression-based cosine.
+    PAN'26 baseline: Compression-based cosine.
 
     References:
     ===========
@@ -110,12 +110,26 @@ def ppmd(input_file, output_directory, outfile_name):
 @click.option('-o', '--outfile-name', help='Output file name', default='tfidf.jsonl', show_default=True)
 def tfidf(input_file, output_directory, outfile_name):
     """
-    PAN'25 baseline: TF-IDF SVM.
+    PAN'26 baseline: TF-IDF SVM.
     """
 
     from pan26_genai_detection.baselines.tfidf import TfidfDetector
     detector = TfidfDetector()
     detect(detector, input_file, output_directory, outfile_name, c_at_1_threshold=0.05)
+
+
+@main.command()
+@click.argument('input_file', type=click.File('r'))
+@click.argument('output_directory', type=click.Path(file_okay=False, exists=True))
+@click.option('-o', '--outfile-name', help='Output file name', default='zero-knowledge.jsonl', show_default=True)
+def zero_knowledge(input_file, output_directory, outfile_name):
+    """
+    PAN'26 baseline: Zero-knowledge.
+    """
+
+    from pan26_genai_detection.baselines.zero_knowledge import ZeroKnowledge
+    detector = ZeroKnowledge()
+    detect(detector, input_file, output_directory, outfile_name)
 
 
 if __name__ == '__main__':
