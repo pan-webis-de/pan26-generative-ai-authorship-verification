@@ -486,7 +486,8 @@ def translate(input_dir, output_dir, src_lang, dest_lang, translator, round_trip
                 try:
                     t = translators.translate_text(t,
                                                    from_language=s,
-                                                   to_language=d,if_use_async=False,
+                                                   to_language=d,
+                                                   if_use_async=False,
                                                    translator=translator)
                     break
                 except:
