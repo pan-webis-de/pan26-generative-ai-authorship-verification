@@ -315,3 +315,40 @@ def split(input_file, output_dir, val_size, test_size, seed):
         if val_size + test_size < len(lines):
             train_out = output_dir / (f.stem + '-train.jsonl')
             _dump_jsonl(lines[val_size + test_size:], train_out, allowed_fields)
+
+
+@main.command(help='Randomize case IDs of existing dataset (overwrites files in-place)')
+@click.argument('data_file', type=click.Path(dir_okay=False, exists=True))
+@click.argument('truth_file', type=click.Path(dir_okay=False, exists=True))
+@click.option('--seed', type=int, default=42, help='Random seed')
+def randomize_ids(data_file, truth_file, seed):
+    random.seed(seed)
+    secret = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(32))
+
+    with open(data_file, 'r') as f:
+        lines = f.readlines()
+    with open(truth_file, 'r') as f:
+        truth_lines = f.readlines()
+
+    used_ids = set()
+    used_ids_truth = set()
+
+    with open(data_file, 'w') as f:
+        for l in lines:
+            j = json.loads(l)
+            new_id = str(uuid.uuid5(uuid.NAMESPACE_OID, secret + j['id']))
+            assert new_id not in used_ids
+            j['id'] = new_id
+            used_ids.add(new_id)
+            f.write(json.dumps(j, ensure_ascii=False) + '\n')
+
+    with open(truth_file, 'w') as f:
+        for l in truth_lines:
+            j = json.loads(l)
+            new_id = str(uuid.uuid5(uuid.NAMESPACE_OID, secret + j['id']))
+            assert new_id in used_ids
+            assert new_id not in used_ids_truth
+            j['orig_id'] = j['id']
+            j['id'] = new_id
+            used_ids_truth.add(new_id)
+            f.write(json.dumps(j, ensure_ascii=False) + '\n')
