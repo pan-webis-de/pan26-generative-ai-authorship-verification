@@ -21,5 +21,16 @@ $ poetry install
 ```
 
 ### Cite
-
-TODO
+```
+@InProceedings{bevendorff:2026,
+  author =                   {Janek Bevendorff and Rohit Raj Gunti and Jussi Karlgren and Maik Fr{\"o}be and Martin Potthast and Benno Stein},
+  booktitle =                {Working Notes of CLEF 2026 -- Conference and Labs of the Evaluation Forum},
+  editor =                   {Eva {S{\'a}nchez Salido} and Alberto Barr{\'o}n-Cede{\~n}o and Alba Garc{\'i}a Seco de Herrera and Sean MacAvaney and Julia Maria Stru{\ss}},
+  month =                    sep,
+  publisher =                {CEUR-WS.org},
+  series =                   {CEUR Workshop Proceedings},
+  site =                     {Jena, Germany},
+  title =                    {{Overview of the third ``Voight-Kampff'' Generative AI / LLM Detection Task at PAN and ELOQUENT 2026}},
+  year =                     2026
+}
+```
